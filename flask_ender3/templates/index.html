@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="kr">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+
+    <title>응애, 나 Ender-3 오너</title>
+    <style>
+      .control_main_div{
+        width: 300px;
+        height: 150px;
+        margin: 0px;
+        padding: 0px;
+      }
+      .control_z_div_col{
+        width: 50px;
+        height: 150px;
+        margin: 0px;
+        padding: 0px;
+      }
+      .control_div_row{
+        width: 150px;
+        height: 150px;
+        margin: 0px;
+        padding: 0px;
+      }
+      .control_div_col{
+        width: 50px;
+        height: 50px;
+        margin: 0px;
+        padding: 0px;
+      }
+      .control_btn{
+        width: 50px;
+        height: 50px;
+        margin: 0px;
+        padding: 0px;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-dark bg-dark">
+      <span class="navbar-brand mb-0 h1">응애 나 Ender-3 Pro 오너</span>
+      <div class='justify-content-right'>
+        <button id="printer-on" class="btn btn-danger">프린터 전원 On</button>
+        <button id="printer-off" class="btn btn-light">프린터 전원 Off</button>
+        <button id="cam-load" class="btn btn-success">카메라 시작</button>
+        <button id="cam-unload" class="btn btn-danger">카메라 종료</button>
+      </div>
+    </nav>
+    <div class="container mt-3 mb-3">
+      <div id="stream-cam" class="align-center text-center">
+        <img id='camera_src' src="http://octosol.ddns.net:8080/stream/video.mjpeg" class="text-center mb-3">
+      </div>
+      <buttun id='sub' class="btn btn-primary mb-3">노즐 및 배드 온도 값 구독</buttun>
+      <button id='unsub_all' class="btn btn-danger mb-3">구독 해제</button>
+
+      <table class="table">
+        <thead class="text-center align-center">
+          <tr>
+            <th scope="col">센서 명</th>
+            <th scope="col">현재 온도</th>
+            <th scope="col">목표 온도</th>
+          </tr>
+        </thead>
+        <tbody class="text-center align-center">
+          <tr>
+            <td>Tool_0 (노즐)</td>
+            <td id="E_act">노즐 및 배드 온도 값 구독 필요</td>
+            <td id="E_target">노즐 및 배드 온도 값 구독 필요</td>
+          </tr>
+          <tr>
+            <td>Bed (핫베드)</td>
+            <td id="B_act">노즐 및 배드 온도 값 구독 필요</td>
+            <td id="B_target">노즐 및 배드 온도 값 구독 필요</td>
+          </tr>
+        </tbody>
+      </table>
+      <div>
+        <label for="position">이동 할 거리</label>
+        <select class="custom-select" id="position" required>
+          <option selected value="0.1">0.1mm</option>
+          <option value="1">1mm</option>
+          <option value="10">10mm</option>
+          <option value="100">100mm</option>
+        </select>
+      </div>
+      <div class="justify-content-center">
+        <div class="row text-center justify-content-center control_main_div">
+          <div class="col row row-cols-3 control_div_row">
+            <div class="col control_div_col"></div>
+            <div class="col control_div_col"><button id='y_up' class="btn btn-outline-dark control_btn"><img src="{{url_for('static', filename='images/up.png')}}" width="50" height="50"></button></div>
+            <div class="col control_div_col"></div>
+            <div class="col control_div_col"><button id='x_left' class="btn btn-outline-dark control_btn"><img src="{{url_for('static', filename='images/left.png')}}" width="50" height="50"></button></div>
+            <div class="col control_div_col"><button id='xy_home' class="btn btn-outline-dark control_btn"><img src="{{url_for('static', filename='images/home.png')}}" width="40" height="40"></button></div>
+            <div class="col control_div_col"><button id='x_right' class="btn btn-outline-dark control_btn"><img src="{{url_for('static', filename='images/right.png')}}" width="50" height="50"></button></div>
+            <div class="col control_div_col"></div>
+            <div class="col control_div_col"><button id='y_down' class="btn btn-outline-dark control_btn"><img src="{{url_for('static', filename='images/down.png')}}" width="50" height="50"></button></div>
+            <div class="col control_div_col"></div>
+          </div>
+          <div class="col control_z_div_col">
+            <div>
+              <div><button id='z_up' class="btn btn-outline-dark control_btn"><img src="{{url_for('static', filename='images/up.png')}}" width="50" height="50"></button></div>
+            </div>
+            <div>
+              <div><button id='z_home' class="btn btn-outline-dark control_btn"><img src="{{url_for('static', filename='images/home.png')}}" width="50" height="50"></button></div>
+            </div>
+            <div>
+              <div><button id='z_down' class="btn btn-outline-dark control_btn"><img src="{{url_for('static', filename='images/down.png')}}" width="50" height="50"></button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <script type="text/javascript" charset="utf-8">
+      $(document).ready(function() {
+        $('#stream-cam').hide();
+        $('#unsub_all').hide();
+        $('#cam-unload').hide();
+        $('#printer-off').hide();
+      }); 
+      const socket = io.connect('https://' + location.hostname + ':' + location.port);
+
+      socket.on('connect', function(){
+        var json = { data: 'SocketIO CDN Load and SocketIO Connect!'};
+        socket.emit('print', json);
+      });
+
+      socket.on('mqtt_message', function(data, payload){
+        var topic = data['topic'];
+        if(topic == 'octoPrint/temp/tool0'){
+          var E_actual_temp = String(payload['actual']);
+          var E_target_temp = String(payload['target']);
+          console.log("topic : " + topic + " E_actual_temp : " + E_actual_temp + " E_target_temp : " + E_target_temp);
+          $('#E_act').html(E_actual_temp);
+          $('#E_target').html(E_target_temp);
+        }
+        else if(topic == 'octoPrint/temp/bed'){
+          var B_actual_temp = String(payload['actual']);
+          var B_target_temp = String(payload['target']);
+          console.log("topic : " + topic + " B_actual_temp : " + B_actual_temp + " B_target_temp : " + B_target_temp);
+          $('#B_act').html(B_actual_temp);
+          $('#B_target').html(B_target_temp);
+        }
+      });
+
+      $('#cam-load').click(function(event){
+        $('#stream-cam').show();
+        $('#cam-unload').show();
+        $('#cam-load').hide();
+      });
+
+      $('#cam-unload').click(function(event){
+        $('#stream-cam').hide();
+        $('#cam-unload').hide();
+        $('#cam-load').show();
+      });
+
+      $('#printer-on').click(function(event){
+        $('#printer-on').hide();
+        $('#printer-off').show();
+        socket.emit('printer_on');
+      });
+
+      $('#printer-off').click(function(event){
+        $('#printer-on').show();
+        $('#printer-off').hide();
+        socket.emit('printer_off');
+      });
+
+      $('#sub').click(function(event){
+        socket.emit('subscribe');
+        $('#sub').hide();
+        $('#unsub_all').show();
+      });
+
+      $('#unsub_all').click(function(event){
+        socket.emit('unsubscribe_all');
+        $('#sub').show();
+        $('#unsub_all').hide();
+        $('#E_act').html("노즐 및 배드 온도 값 구독 필요");
+        $('#E_target').html("노즐 및 배드 온도 값 구독 필요");
+        $('#B_act').html("노즐 및 배드 온도 값 구독 필요");
+        $('#B_target').html("노즐 및 배드 온도 값 구독 필요");
+      });
+
+      $('#y_up').click(function(event){
+        var pos_value = $('#position').val()
+        console.log(pos_value);
+        socket.emit('y_up', pos_value);
+      });
+
+      $('#x_left').click(function(event){
+        var pos_value = $('#position').val()
+        console.log(pos_value);
+        socket.emit('x_left', pos_value);
+      });
+
+      $('#xy_home').click(function(event){
+        socket.emit('xy_home');
+      });
+
+      $('#x_right').click(function(event){
+        var pos_value = $('#position').val()
+        console.log(pos_value);
+        socket.emit('x_right', pos_value);
+      });
+
+      $('#y_down').click(function(event){
+        var pos_value = $('#position').val()
+        console.log(pos_value);
+        socket.emit('y_down', pos_value);
+      });
+
+      $('#z_up').click(function(event){
+        var pos_value = $('#position').val()
+        console.log(pos_value);
+        socket.emit('z_up', pos_value);
+      });
+
+      $('#z_home').click(function(event){
+        socket.emit('z_home');
+      });
+
+      $('#z_down').click(function(event){
+        var pos_value = $('#position').val()
+        console.log(pos_value);
+        socket.emit('z_down', pos_value);
+      });
+    </script>
+  </body>
+</html>
