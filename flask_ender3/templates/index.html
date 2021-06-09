@@ -130,11 +130,16 @@
         $('#cam-unload').hide();
       });
       
-      const socket = io.connect('https://' + location.hostname + ':' + location.port);
+      const socket = io.connect('https://gvsolgryn.ddns.net:3333');
 
       socket.on('connect', function(){
         var json = { data: 'SocketIO CDN Load and SocketIO Connect!'};
         socket.emit('conn', json);
+      });
+
+      socket.on('psu_status', function(data){
+        var status = data;
+        console.log("psu_status = " + status);
       });
 
       socket.on('mqtt_message', function(data, payload){

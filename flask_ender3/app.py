@@ -2,11 +2,11 @@ from flask import Flask, render_template, json, request, redirect, url_for
 from flask_mqtt import Mqtt
 from flask_socketio import SocketIO
 
+import time
+
 from module import idpw, dbModule
 
 import ast
-
-async_mode = None
 
 app = Flask(__name__, static_folder='./ender3_static')
 app.config['SECRET'] = 'mqttSocketIO'
@@ -19,17 +19,21 @@ app.config['MQTT_KEEPALIVE'] = 5
 app.config['MQTT_TLS_ENABLED'] = False
 
 mqtt = Mqtt(app)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode=async_mode)
+socketio = SocketIO(app, cors_allowed_origins="*")
 db = dbModule.Database()
 
 @app.route('/')
 def index():
-    return render_template('index.html', sync_mode=socketio.async_mode)
+    return render_template('index.html')
 
 
 @socketio.on('conn')
 def handle_conn(data):
     print(data['data'])
+    sql = 'SELECT status FROM psu WHERE id = 1'
+    db_data = db.executeOne(sql)
+    print(db_data['status'])
+    socketio.emit('psu_status', db_data['status'])
     
 
 @socketio.on('subscribe')
@@ -94,14 +98,33 @@ def xy_down(val):
 
 @socketio.on('printer_on')
 def printer_on():
+    socketio.emit('usb_on')
+    time.sleep(6)
+    mqtt.publish('printer/usb/connect', 'connect')
+    time.sleep(6)
     mqtt.publish('printer/power/on', 'on')
     print('프린터 전원 On')
+    socketio.emit('usb_off')
+    mqtt.publish('printer/usb/disconnect', 'disconnect')
+    time.sleep(0.5)
+    socketio.emit('usb_on')
+    time.sleep(5)
+    mqtt.publish('printer/usb/connect', 'connect')
+    sql = 'UPDATE psu SET status = 1 WHERE id = 1'
+    db.execute(sql)
+    db.commit()
 
 
 @socketio.on('printer_off')
 def printer_off():
     mqtt.publish('printer/power/off', 'off')
     print('프린터 전원 Off')
+    sql = 'UPDATE psu SET status = 0 WHERE id = 1'
+    db.execute(sql)
+    db.commit()
+    time.sleep(0.5)
+    socketio.emit('usb_off')
+    mqtt.publish('printer/usb/disconnect', 'disconnect')
 
 
 @mqtt.on_message()
