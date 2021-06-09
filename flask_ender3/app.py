@@ -2,9 +2,11 @@ from flask import Flask, render_template, json, request, redirect, url_for
 from flask_mqtt import Mqtt
 from flask_socketio import SocketIO
 
-from module import idpw
+from module import idpw, dbModule
 
 import ast
+
+async_mode = None
 
 app = Flask(__name__, static_folder='./ender3_static')
 app.config['SECRET'] = 'mqttSocketIO'
@@ -17,13 +19,18 @@ app.config['MQTT_KEEPALIVE'] = 5
 app.config['MQTT_TLS_ENABLED'] = False
 
 mqtt = Mqtt(app)
-socketio = SocketIO(app, cors_allowed_origins="*")
-
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode=async_mode)
+db = dbModule.Database()
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', sync_mode=socketio.async_mode)
 
+
+@socketio.on('conn')
+def handle_conn(data):
+    print(data['data'])
+    
 
 @socketio.on('subscribe')
 def handle_subscribe():

@@ -128,13 +128,13 @@
         $('#stream-cam').hide();
         $('#unsub_all').hide();
         $('#cam-unload').hide();
-        $('#printer-off').hide();
-      }); 
+      });
+      
       const socket = io.connect('https://' + location.hostname + ':' + location.port);
 
       socket.on('connect', function(){
         var json = { data: 'SocketIO CDN Load and SocketIO Connect!'};
-        socket.emit('print', json);
+        socket.emit('conn', json);
       });
 
       socket.on('mqtt_message', function(data, payload){
@@ -143,15 +143,15 @@
           var E_actual_temp = String(payload['actual']);
           var E_target_temp = String(payload['target']);
           console.log("topic : " + topic + " E_actual_temp : " + E_actual_temp + " E_target_temp : " + E_target_temp);
-          $('#E_act').html(E_actual_temp);
-          $('#E_target').html(E_target_temp);
+          $('#E_act').html(E_actual_temp + "°C");
+          $('#E_target').html(E_target_temp + "°C");
         }
         else if(topic == 'octoPrint/temp/bed'){
           var B_actual_temp = String(payload['actual']);
           var B_target_temp = String(payload['target']);
           console.log("topic : " + topic + " B_actual_temp : " + B_actual_temp + " B_target_temp : " + B_target_temp);
-          $('#B_act').html(B_actual_temp);
-          $('#B_target').html(B_target_temp);
+          $('#B_act').html(B_actual_temp + "°C");
+          $('#B_target').html(B_target_temp + "°C");
         }
       });
 
@@ -168,14 +168,10 @@
       });
 
       $('#printer-on').click(function(event){
-        $('#printer-on').hide();
-        $('#printer-off').show();
         socket.emit('printer_on');
       });
 
       $('#printer-off').click(function(event){
-        $('#printer-on').show();
-        $('#printer-off').hide();
         socket.emit('printer_off');
       });
 
