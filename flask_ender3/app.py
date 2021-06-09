@@ -25,11 +25,6 @@ def index():
     return render_template('index.html')
 
 
-@socketio.on('print')
-def handle_print(data):
-    print(data['data'])
-
-
 @socketio.on('subscribe')
 def handle_subscribe():
     mqtt.subscribe('octoPrint/temp/#')
