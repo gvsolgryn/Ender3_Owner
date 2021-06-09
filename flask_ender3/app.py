@@ -87,13 +87,13 @@ def xy_down(val):
 
 @socketio.on('printer_on')
 def printer_on():
-    mqtt.publish('printer/power', 'on')
+    mqtt.publish('printer/power/on', 'on')
     print('프린터 전원 On')
 
 
 @socketio.on('printer_off')
 def printer_off():
-    mqtt.publish('printer/power', 'off')
+    mqtt.publish('printer/power/off', 'off')
     print('프린터 전원 Off')
 
 
