@@ -1,0 +1,6 @@
+# Ender3_Owner
+두원공과대학교 프로젝트
+---
+이런거 쓰지 말고... Klipper 펌웨어 사용하세요...
+
+Klipper + Moonraker + Fluidd 조합이 최곱니다...
